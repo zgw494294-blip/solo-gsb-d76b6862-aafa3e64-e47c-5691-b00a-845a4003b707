@@ -1,0 +1,16 @@
+services:
+  http-stub:
+    build: .
+    image: ordered-http-stub:latest
+    container_name: ordered-http-stub
+    ports:
+      - "8000:8000"
+    # 替身状态只存在单进程内存中：不要扩容到多个副本
+    deploy:
+      replicas: 1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/__control/health').status==200 else 1)"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
